@@ -67,8 +67,8 @@ export function FinalCta(): ReactNode {
                 animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
                 transition={{ duration: 0.8, ease: easeOutExpo, delay: 0.6 }}
               >
-                Spin up a workspace in under a minute. Pro is free for 14 days,
-                no card, no calls, no friction.
+                Spin up a workspace in under a minute. The free tier is ready
+                when you are, no card, no calls, no friction.
               </motion.p>
 
               <motion.button
@@ -81,7 +81,7 @@ export function FinalCta(): ReactNode {
                 whileTap={{ scale: 0.98 }}
               >
                 <span className="px-5 py-3 rounded-md bg-white text-neutral-900 text-xs font-medium tracking-widest uppercase border border-neutral-900/[0.08]">
-                  Get Lumen
+                  Get PTFlow
                 </span>
                 <ArrowChip className="bg-white text-neutral-900" />
               </motion.button>

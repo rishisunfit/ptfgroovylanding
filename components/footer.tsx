@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ArrowChip } from "@/components/arrow-chip";
+import { PtflowMark } from "@/components/nav";
 import type { ReactNode } from "react";
 
 const PRODUCT_LINKS = [
@@ -14,7 +15,7 @@ const PRODUCT_LINKS = [
 
 const COMPANY_LINKS = [
   { label: "About", href: "#" },
-  { label: "Customers", href: "#partners" },
+  { label: "Demo", href: "#demo" },
   { label: "Careers", href: "#" },
   { label: "Press", href: "#" },
   { label: "Contact", href: "#" },
@@ -66,11 +67,11 @@ export function Footer(): ReactNode {
 
         <div className="mt-12">
           <Link
-            href="mailto:hello@lumen.app"
+            href="mailto:hello@ptflow.io"
             className="group inline-flex items-stretch gap-1"
           >
-            <span className="px-5 py-3 rounded-md bg-foreground text-background text-xs font-medium tracking-widest uppercase">
-              hello@lumen.app
+            <span className="rounded-md bg-foreground px-5 py-3 text-xs font-medium uppercase tracking-widest text-background">
+              hello@ptflow.io
             </span>
             <ArrowChip className="bg-foreground text-background" />
           </Link>
@@ -83,11 +84,8 @@ export function Footer(): ReactNode {
             href="/"
             className="inline-flex items-center gap-3 text-xl font-medium tracking-tight"
           >
-            <span
-              aria-hidden
-              className="h-8 w-8 rounded-full border-2 border-foreground/70"
-            />
-            Lumen
+            <PtflowMark className="size-8 shrink-0" />
+            PTFlow
           </Link>
           <p className="mt-4 text-foreground/55 max-w-xs leading-relaxed">
             The shared surface where teams design, deploy, and scale
@@ -103,7 +101,7 @@ export function Footer(): ReactNode {
 
       <div className="mt-auto">
         <div className="mx-auto w-full max-w-[1680px] px-6 lg:px-10 py-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between text-sm text-foreground/55">
-          <p>© 2026 Lumen Labs, Inc. All rights reserved.</p>
+          <p>© 2026 PTFlow Labs, Inc. All rights reserved.</p>
           <div className="flex items-center gap-6">
             {LEGAL_LINKS.map((link) => (
               <Link

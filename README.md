@@ -117,7 +117,7 @@ The default `siteConfig.url` is `https://example.com` — replace it with your p
 
 ### 2. Update Brand & FAQ Copy
 
-- Brand wordmark `Lumen` lives in `components/nav.tsx` and `components/footer.tsx` — search for `Lumen` to update both.
+- Brand wordmark `PTFlow` lives in `components/nav.tsx` and `components/footer.tsx` — search for `PTFlow` to update both.
 - FAQ items live in `lib/faq-data.ts`. They are consumed by both the visible FAQ accordion and the `FAQPage` JSON-LD block — edit once, both update.
 - Pricing tiers and offers live in `components/pricing.tsx` and the `SoftwareApplication` JSON-LD inside `components/structured-data.tsx`. Keep them in sync.
 

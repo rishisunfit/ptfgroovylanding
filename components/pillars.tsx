@@ -11,7 +11,7 @@ interface Pillar {
 
   tag: string;
   title: string;
-  body: string;
+  body: ReactNode;
   icon: LucideIcon;
 }
 
@@ -19,19 +19,26 @@ const PILLARS: Pillar[] = [
   {
     tag: "01 — focus",
     title: "Plan with intent",
-    body: "Replace scattered docs and threads with a single source of truth that turns goals into commits.",
+    body: "Replace scattered workouts and exercises with a single source of truth that creates consistency, not chaos.",
     icon: Compass,
   },
   {
     tag: "02 — flow",
     title: "Build without friction",
-    body: "Branches, environments, and reviews stay in sync so the work moves at the speed of decisions.",
+    body: "Programs, adjustments, and data stay in sync so the admin work moves at the speed of decisions.",
     icon: Layers,
   },
   {
-    tag: "03 — fire",
-    title: "Ship with confidence",
-    body: "Deploys, observability, and rollbacks live in one loop — so the team trusts every release.",
+    tag: "03 — fair",
+    title: "Keep it fun, keep it fair",
+    body: (
+      <>
+        Smart systems keep costs low for you,
+        which keeps costs low for clients. Keeps{" "}
+        <strong className="font-bold">you</strong> competitive, keeps{" "}
+        <strong className="font-bold">them</strong> happy.
+      </>
+    ),
     icon: Zap,
   },
 ];
@@ -67,7 +74,7 @@ export function Pillars(): ReactNode {
               delay={0.05}
               className="text-balance text-[clamp(2rem,4.2vw,4rem)] font-medium leading-[0.85] tracking-tight"
             >
-              The Lumen platform is built on three working principles.
+              The PTFlow platform is built on three working principles.
             </RevealHeadline>
             <motion.p
               initial={{ opacity: 0, y: 8 }}
@@ -76,7 +83,8 @@ export function Pillars(): ReactNode {
               className="mt-6 max-w-[60ch] text-balance text-xl max-[850px]:text-lg font-light leading-snug text-foreground/60"
             >
               Each one carries part of the workflow — turning the fragmented
-              act of shipping software into a single, continuous motion.
+              act of building/assigning PT programs into a single, continuous
+              motion.
             </motion.p>
           </div>
         </div>

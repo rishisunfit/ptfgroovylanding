@@ -5,27 +5,23 @@ export interface FaqItem {
 
 export const FAQ_ITEMS: FaqItem[] = [
   {
-    q: "How does the free trial work?",
-    a: "Every workspace starts on Pro for 14 days, no card required. You get the full feature set, unlimited projects, and real collaboration. When the trial ends you can downgrade, switch to Enterprise, or keep going on Pro.",
+    q: "How does the free tier work?",
+    a: "The app is literally yours to download. All your plans & workouts stay on your laptop for you to give to clients forever. If you need cloud access, it's just $27/month.",
   },
   {
     q: "Can I bring my existing tools?",
-    a: "Yes. Lumen connects to GitHub, GitLab, Slack, Linear, Jira, and Figma out of the box. Anything else, the public API and webhooks cover. Most teams are wired up in under an hour.",
+    a: "Yes. PTFlow connects to Google Sheets, Stripe, typeform, calendly, and most of the other tools you already use.",
   },
   {
-    q: "What does pricing look like at scale?",
-    a: "Pro stays at $29 per seat regardless of headcount. Enterprise pricing depends on your security model, support tier, and infrastructure footprint. We will quote a flat annual commitment, never a metered surprise.",
+    q: "I'm already on another PT software. How hard is it to migrate?",
+    a: "It's super simple. We've built custom integrations for integrations from everfit, trainerize, kahunas, and most other PT software. If you need help, we're happy to walk through the process.",
   },
   {
     q: "How is my data handled?",
-    a: "Data is encrypted in transit and at rest, isolated per workspace, and stored in the region you pick at signup. Enterprise plans add SSO, SCIM, audit logs, custom DPAs, and SOC 2 Type II reports on request.",
-  },
-  {
-    q: "Do you support self-hosting?",
-    a: "Self-hosted deployments are available on Enterprise. You run Lumen inside your own VPC on AWS, GCP, or Azure, we handle upgrades through a managed control plane. Talk to sales for a reference architecture.",
+    a: "Data is encrypted in transit and at rest, isolated per workspace, and stored in the region you pick at signup. WE DO NOT SHARE/SELL YOUR DATA.",
   },
   {
     q: "What if I need to cancel?",
-    a: "Cancel anytime from billing settings. You keep access through the end of the current period and can export every project, file, and asset as a single archive. No retention games.",
+    a: "If you've upgraded to a paid plan, you can cancel anytime from billing settings. You keep access through the end of the current period and can export every project, file, and asset as a single archive.",
   },
 ];

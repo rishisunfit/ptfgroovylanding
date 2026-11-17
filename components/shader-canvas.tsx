@@ -1,6 +1,7 @@
 "use client";
 
 import { useShaderVariant } from "@/components/shader-variant-context";
+import { getVariantById, type ShaderVariantId } from "@/lib/shader-variants";
 import { Renderer, Program, Mesh, Triangle } from "ogl";
 import { useEffect, useRef, type ReactNode } from "react";
 
@@ -88,13 +89,60 @@ void main(){
 
 interface Props {
   className?: string;
+  variantId?: ShaderVariantId | "mint";
+  transitionMs?: number;
 }
 
 const DPR_CAP = 1.5;
 
-export function ShaderCanvas({ className }: Props): ReactNode {
+interface PaletteSnapshot {
+  base: [number, number, number];
+  warm: [number, number, number];
+  mid: [number, number, number];
+  cool: [number, number, number];
+  cursor: [number, number, number];
+  rgScale: [number, number, number];
+  brightness: number;
+}
+
+function read3(value: unknown): [number, number, number] {
+  const channel = value as number[];
+  return [channel[0] ?? 0, channel[1] ?? 0, channel[2] ?? 0];
+}
+
+function mix3(
+  target: number[],
+  from: readonly number[],
+  to: readonly number[],
+  t: number,
+): void {
+  target[0] = from[0]! + (to[0]! - from[0]!) * t;
+  target[1] = from[1]! + (to[1]! - from[1]!) * t;
+  target[2] = from[2]! + (to[2]! - from[2]!) * t;
+}
+
+function snapshotPalette(
+  uniforms: Record<string, { value: unknown }>,
+): PaletteSnapshot {
+  return {
+    base: read3(uniforms.u_pal_base?.value),
+    warm: read3(uniforms.u_pal_warm?.value),
+    mid: read3(uniforms.u_pal_mid?.value),
+    cool: read3(uniforms.u_pal_cool?.value),
+    cursor: read3(uniforms.u_pal_cursor?.value),
+    rgScale: read3(uniforms.u_pal_rgScale?.value),
+    brightness: Number(uniforms.u_brightness?.value ?? 1),
+  };
+}
+
+export function ShaderCanvas({
+  className,
+  variantId,
+  transitionMs = 0,
+}: Props): ReactNode {
   const hostRef = useRef<HTMLDivElement>(null);
-  const { variant } = useShaderVariant();
+  const { variant: liveVariant } = useShaderVariant();
+  const variant = variantId ? getVariantById(variantId) : liveVariant;
 
   const variantRef = useRef(variant);
   useEffect(() => {
@@ -298,18 +346,51 @@ export function ShaderCanvas({ className }: Props): ReactNode {
   }, []);
 
   useEffect(() => {
-    const u = uniformsRef.current;
-    if (!u) return;
     const h = variant.hero;
+    let raf = 0;
+    let cancelled = false;
 
-    (u.u_pal_base!.value as number[]).splice(0, 3, ...h.base);
-    (u.u_pal_warm!.value as number[]).splice(0, 3, ...h.warm);
-    (u.u_pal_mid!.value as number[]).splice(0, 3, ...h.mid);
-    (u.u_pal_cool!.value as number[]).splice(0, 3, ...h.cool);
-    (u.u_pal_cursor!.value as number[]).splice(0, 3, ...h.cursor);
-    (u.u_pal_rgScale!.value as number[]).splice(0, 3, ...h.rgScale);
-    u.u_brightness!.value = h.brightness;
-  }, [variant]);
+    const apply = (t: number, from: PaletteSnapshot): void => {
+      const u = uniformsRef.current;
+      if (!u) return;
+      mix3(u.u_pal_base!.value as number[], from.base, h.base, t);
+      mix3(u.u_pal_warm!.value as number[], from.warm, h.warm, t);
+      mix3(u.u_pal_mid!.value as number[], from.mid, h.mid, t);
+      mix3(u.u_pal_cool!.value as number[], from.cool, h.cool, t);
+      mix3(u.u_pal_cursor!.value as number[], from.cursor, h.cursor, t);
+      mix3(u.u_pal_rgScale!.value as number[], from.rgScale, h.rgScale, t);
+      u.u_brightness!.value = from.brightness + (h.brightness - from.brightness) * t;
+    };
+
+    const run = (): void => {
+      if (cancelled) return;
+      const u = uniformsRef.current;
+      if (!u) {
+        raf = requestAnimationFrame(run);
+        return;
+      }
+      const from = snapshotPalette(u);
+      if (transitionMs <= 0) {
+        apply(1, from);
+        return;
+      }
+      const start = performance.now();
+      const tick = (now: number): void => {
+        if (cancelled) return;
+        const t = Math.min(1, (now - start) / transitionMs);
+        const eased = t * t * (3 - 2 * t);
+        apply(eased, from);
+        if (t < 1) raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+    };
+
+    run();
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(raf);
+    };
+  }, [variant, transitionMs]);
 
   return (
     <div

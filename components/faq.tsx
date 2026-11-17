@@ -37,17 +37,22 @@ function Row({ item, index, open, onToggle, inView }: RowProps): ReactNode {
         className="group block w-full text-left transition-colors duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-foreground/[0.03]"
       >
         <div className="relative flex items-center gap-6 px-2 py-7 max-[850px]:py-6">
-          <span className="font-mono text-xs uppercase tracking-widest text-foreground/40 tabular-nums shrink-0 w-10 max-[850px]:w-8">
+          <span className={["w-10 shrink-0 font-mono text-xs uppercase tracking-widest tabular-nums max-[850px]:w-8", open ? "text-[#5ec29c]" : "text-foreground/40"].join(" ")}>
             {String(index + 1).padStart(2, "0")}
           </span>
 
-          <span className="flex-1 text-xl max-[850px]:text-lg font-medium tracking-tight leading-snug">
+          <span className={["flex-1 text-xl font-medium leading-snug tracking-tight max-[850px]:text-lg", open ? "text-[#5ec29c]" : ""].join(" ")}>
             {item.q}
           </span>
 
           <span
             aria-hidden
-            className="relative flex h-9 w-9 max-[850px]:h-8 max-[850px]:w-8 shrink-0 items-center justify-center rounded-full border border-foreground/[0.12] text-foreground/70 transition-colors duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:border-foreground/30 group-hover:text-foreground"
+            className={[
+              "relative flex h-9 w-9 max-[850px]:h-8 max-[850px]:w-8 shrink-0 items-center justify-center rounded-full border transition-colors duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
+              open
+                ? "border-[#5ec29c] text-[#5ec29c]"
+                : "border-foreground/[0.12] text-foreground/70 group-hover:border-foreground/30 group-hover:text-foreground",
+            ].join(" ")}
           >
             <motion.span
               initial={false}
@@ -79,7 +84,7 @@ function Row({ item, index, open, onToggle, inView }: RowProps): ReactNode {
             >
               <div className="flex gap-6 px-2 pb-8 max-[850px]:pb-6">
                 <span className="w-10 max-[850px]:w-8 shrink-0" aria-hidden />
-                <p className="max-w-[68ch] text-base max-[850px]:text-sm leading-relaxed text-foreground/65 pr-12">
+                <p className="max-w-[68ch] pr-12 text-base leading-relaxed text-foreground/65 max-[850px]:text-sm">
                   {item.a}
                 </p>
               </div>
@@ -122,7 +127,7 @@ export function Faq(): ReactNode {
               delay={0.05}
               className="text-balance text-[clamp(2rem,4.2vw,4rem)] font-medium leading-[0.85] tracking-tight"
             >
-              The questions teams ask before switching to Lumen.
+              The questions teams ask before switching to PTFlow.
             </RevealHeadline>
             <motion.p
               initial={{ opacity: 0, y: 8 }}

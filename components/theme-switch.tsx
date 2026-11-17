@@ -2,6 +2,7 @@
 
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+import { usePathname } from "next/navigation";
 import { useSyncExternalStore, type ReactNode } from "react";
 
 function useIsMounted(): boolean {
@@ -14,15 +15,18 @@ function useIsMounted(): boolean {
 
 export function ThemeSwitch(): ReactNode {
   const mounted = useIsMounted();
+  const pathname = usePathname();
   const { setTheme, resolvedTheme } = useTheme();
 
   const toggleTheme = (): void => {
     setTheme(resolvedTheme === "dark" ? "light" : "dark");
   };
 
+  if (pathname === "/login") return null;
+
   if (!mounted) {
     return (
-      <div className="fixed bottom-[104px] right-6 z-50">
+      <div className="fixed bottom-[104px] right-6 z-50 min-[850px]:top-[calc(58%+3.25rem)] min-[850px]:bottom-auto min-[850px]:left-6 min-[850px]:right-auto">
         <button
           className="h-10 w-10 cursor-not-allowed rounded-full bg-foreground/10 opacity-30"
           aria-label="Toggle theme"
@@ -35,7 +39,7 @@ export function ThemeSwitch(): ReactNode {
   const isDark = resolvedTheme === "dark";
 
   return (
-    <div className="fixed bottom-[104px] right-6 z-50">
+    <div className="fixed bottom-[104px] right-6 z-50 min-[850px]:top-[calc(58%+3.25rem)] min-[850px]:bottom-auto min-[850px]:left-6 min-[850px]:right-auto">
       <button
         onClick={toggleTheme}
         className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-muted text-foreground opacity-30 shadow-lg transition-opacity duration-300 hover:opacity-100 hover:shadow-xl"

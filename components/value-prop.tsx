@@ -2,277 +2,395 @@
 
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { RollingArrow } from "@/components/arrow-chip";
-import { useTheme } from "next-themes";
-import { useEffect, useRef, type ReactNode } from "react";
-import { WaveShader, type WaveParams, type WaveShaderHandle } from "./wave-shader";
+import { Check, X } from "lucide-react";
+import { motion } from "motion/react";
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { FillablePtflowMark, PtflowMark } from "@/components/nav";
 
-interface Step {
-  eyebrow: string;
-  body: string;
+interface Card {
+  label: string;
+  title: string;
+  points: string[];
+  mark: "x" | "check";
+  surface: string;
+  ink: string;
+  muted: string;
+  chip: string;
 }
 
-const STEPS: Step[] = [
+const CARDS: Card[] = [
   {
-    eyebrow: "The problem",
-    body: "Modern teams ship slower than they think. Tooling fragments, context evaporates, and momentum dies between handoffs.",
+    label: "Before",
+    title: "Spread thin across docs, apps, and naps",
+    points: [
+      "Great programming takes too long.",
+      "Zero customization over tools.",
+      "Expensive AI integrations.",
+      "Locked into workflows.",
+    ],
+    mark: "x",
+    surface: "bg-[#f5f5e9] dark:bg-[#23231e]",
+    ink: "text-[#242424] dark:text-[#f4f1e8]",
+    muted: "text-[#242424]/60 dark:text-[#f4f1e8]/60",
+    chip: "bg-[#242424] text-white",
   },
   {
-    eyebrow: "The approach",
-    body: "Lumen unifies design, deployment, and observability into one system, so the work flows in a single, continuous direction.",
-  },
-  {
-    eyebrow: "The outcome",
-    body: "You stop managing tools and start compounding output. Every release sharper, every iteration faster, every decision clearer.",
+    label: "After",
+    title: "Better programs. More clients. YOUR platform.",
+    points: [
+      "Training plans built in minutes.",
+      "121+ custom tools.",
+      "Ethical AI, free forever.",
+      "Build a workflow for YOUR style.",
+    ],
+    mark: "check",
+    surface: "bg-[#5ec29c] dark:bg-[#3e9a74]",
+    ink: "text-white",
+    muted: "text-white/80",
+    chip: "bg-white text-[#173028]",
   },
 ];
 
-const REVEAL = 0.7;
-const DWELL = 0.3;
-const STEP_DURATION = REVEAL + DWELL; 
+const CYCLE_WORDS = ["speed", "style", "soul"] as const;
+const CYCLE_MS = 1250;
 
-const STEP_PRESETS: WaveParams[] = [
-  {
-    amp: 0.16,
-    freq: 1.0,        
-    complexity: 0.85,
-    speed: 0.55,
-    thickness: 0.07,
-    hue: 0.05,
-    curve: -0.18,    
-    warp: 0.10,      
-    chroma: 0.65,
-    bias: 0.04,
-  },
-  {
-    amp: 0.26,
-    freq: 0.45,       
-    complexity: 0.45,
-    speed: 0.40,
-    thickness: 0.11,  
-    hue: 0.30,
-    curve: 0.22,      
-    warp: 0.03,
-    chroma: 0.90,     
-    bias: -0.02,
-  },
-  {
-    amp: 0.10,
-    freq: 0.32,       
-    complexity: 0.20,
-    speed: 0.22,      
-    thickness: 0.16,  
-    hue: 0.65,
-    curve: 0.05,      
-    warp: 0.0,        
-    chroma: 0.95,     
-    bias: 0.0,
-  },
-];
+function CyclingWord(): ReactNode {
+  const [autoIndex, setAutoIndex] = useState(0);
+  const [inView, setInView] = useState(false);
+  const [desktop, setDesktop] = useState(false);
+  const [arrival, setArrival] = useState<"mid" | "settle" | "run">("mid");
+  const rootRef = useRef<HTMLSpanElement>(null);
+  const current = autoIndex;
+  const intro = desktop && arrival !== "run";
+
+  useLayoutEffect(() => {
+    const media = window.matchMedia("(min-width: 850px)");
+    const apply = () => setDesktop(media.matches);
+    apply();
+    media.addEventListener("change", apply);
+    return () => media.removeEventListener("change", apply);
+  }, []);
+
+  useEffect(() => {
+    const node = rootRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry?.isIntersecting ?? false),
+      { threshold: 0.6 },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!inView) {
+      setAutoIndex(0);
+      setArrival("mid");
+      return;
+    }
+    if (!desktop) {
+      setArrival("run");
+      const id = window.setInterval(() => {
+        setAutoIndex((value) => (value + 1) % CYCLE_WORDS.length);
+      }, CYCLE_MS);
+      return () => window.clearInterval(id);
+    }
+    setArrival("settle");
+    const settle = window.setTimeout(() => setArrival("run"), 230);
+    const id = window.setInterval(() => {
+      setAutoIndex((value) => (value + 1) % CYCLE_WORDS.length);
+    }, CYCLE_MS);
+    return () => {
+      window.clearTimeout(settle);
+      window.clearInterval(id);
+    };
+  }, [inView, desktop]);
+
+  return (
+    <span
+      ref={rootRef}
+      className="inline-grid overflow-hidden align-baseline text-left text-[#5ec29c]"
+    >
+      {CYCLE_WORDS.map((word, i) => {
+        const active = i === current;
+        const previous = i === (current + CYCLE_WORDS.length - 1) % CYCLE_WORDS.length;
+        const entering = word === "speed";
+        const leaving = word === "soul";
+        let y = "110%";
+        let opacity = 0;
+        if (intro && current === 0) {
+          if (entering) {
+            y = arrival === "mid" ? "55%" : "0%";
+            opacity = arrival === "mid" ? 0.55 : 1;
+          } else if (leaving) {
+            y = arrival === "mid" ? "-55%" : "-110%";
+            opacity = arrival === "mid" ? 0.55 : 0;
+          }
+        } else {
+          y = active ? "0%" : previous ? "-110%" : "110%";
+          opacity = active ? 1 : 0;
+        }
+        const moving = intro ? entering || leaving : active || previous;
+        return (
+          <motion.span
+            key={word}
+            aria-hidden={intro ? word !== "speed" : !active}
+            className="col-start-1 row-start-1 pb-[0.08em]"
+            initial={false}
+            animate={{ y, opacity }}
+            transition={{
+              duration: !moving || arrival === "mid" ? 0 : intro ? 0.23 : 0.45,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+          >
+            {word}
+          </motion.span>
+        );
+      })}
+    </span>
+  );
+}
+
+function BeforeLogo(): ReactNode {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [filled, setFilled] = useState(false);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    let frame = 0;
+    const measure = () => {
+      setFilled(node.getBoundingClientRect().top <= window.innerHeight * 0.46);
+    };
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(measure);
+    };
+    measure();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
+
+  return (
+    <span ref={ref} className="flex size-11 items-center justify-center rounded-full bg-white text-[#242424]">
+      <FillablePtflowMark filled={filled} className="size-8" />
+    </span>
+  );
+}
+
+function ComparisonCard({
+  card,
+  className,
+  id,
+  ref,
+}: {
+  card: Card;
+  className: string;
+  id?: string;
+  ref?: (el: HTMLElement | null) => void;
+}): ReactNode {
+  return (
+    <article ref={ref} id={id} className={`${className} ${card.surface} ${card.ink}`}>
+      <p className={`text-[15px] font-medium tracking-[-0.01em] ${card.muted}`}>
+        {card.label}
+      </p>
+      <div className={card.label === "Before" ? "mt-4 hidden items-center min-[850px]:flex" : "mt-4 flex items-center"}>
+        {card.label === "Before" ? (
+          <BeforeLogo />
+        ) : (
+          <span className="flex size-11 items-center justify-center rounded-full bg-white">
+            <PtflowMark className="size-8" />
+          </span>
+        )}
+      </div>
+      <h3 className="mt-7 max-w-[18ch] text-[clamp(1.7rem,2.2vw,2.35rem)] font-medium leading-[1.08] tracking-tight">
+        {card.title}
+      </h3>
+      <ul className="mt-auto flex flex-col gap-3.5 pt-8">
+        {card.points.map((point) => (
+          <li key={point} className="flex items-start gap-3 text-[15px] leading-snug">
+            <span className={`mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full ${card.chip}`}>
+              {card.mark === "x" ? (
+                <X className="size-3.5" strokeWidth={2.6} />
+              ) : (
+                <Check className="size-3.5" strokeWidth={2.6} />
+              )}
+            </span>
+            <span>{point}</span>
+          </li>
+        ))}
+      </ul>
+    </article>
+  );
+}
+
+const metrics = {
+  mobile: false,
+  cardW: 440,
+  cardH: 600,
+  gap: 28,
+};
+
+function measure(pin: HTMLElement): void {
+  const w = pin.clientWidth;
+  const h = pin.clientHeight;
+  metrics.mobile = w < 850;
+  metrics.gap = 28;
+  const side = metrics.mobile ? 40 : 80;
+  metrics.cardW = Math.min(480, Math.floor((w - side - metrics.gap) / 2));
+  metrics.cardH = Math.round(Math.min(h * 0.76, 700));
+}
+
+function slot(index: number): number {
+  const { cardW, gap } = metrics;
+  const total = cardW * 2 + gap;
+  const start = -total / 2 + cardW / 2;
+  return start + index * (cardW + gap);
+}
 
 export function ValueProp(): ReactNode {
   const sectionRef = useRef<HTMLElement>(null);
   const pinRef = useRef<HTMLDivElement>(null);
-  const progressBarRef = useRef<HTMLDivElement>(null);
-  const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const wordRefs = useRef<(HTMLSpanElement | null)[][]>(
-    STEPS.map(() => []),
-  );
-  const waveRef = useRef<WaveShaderHandle>(null);
+  const headlineRef = useRef<HTMLHeadingElement>(null);
+  const cardRefs = useRef<(HTMLElement | null)[]>([]);
 
-  const { resolvedTheme } = useTheme();
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+  useLayoutEffect(() => {
     const section = sectionRef.current;
     const pin = pinRef.current;
-    const bar = progressBarRef.current;
-    if (!section || !pin || !bar) return;
+    const headline = headlineRef.current;
+    const cards = cardRefs.current.filter((el): el is HTMLElement => el !== null);
+    if (!section || !pin || !headline || cards.length !== CARDS.length) return;
 
     gsap.registerPlugin(ScrollTrigger);
-
     gsap.ticker.lagSmoothing(0);
 
-    const isDark = resolvedTheme === "dark";
-    const DIM = isDark ? "rgba(250,250,250,0.18)" : "rgba(10,10,10,0.20)";
-    const BRIGHT = isDark ? "rgba(250,250,250,1)" : "rgba(10,10,10,1)";
+    const [before, after] = cards as [HTMLElement, HTMLElement];
+    let timeline: gsap.core.Timeline | null = null;
 
-    const SCROLL_PER_STEP = window.innerHeight;
-    const totalScroll = SCROLL_PER_STEP * STEPS.length;
-
-    gsap.set(bar, { scaleX: 0, transformOrigin: "0 0" });
-    stepRefs.current.forEach((el, i) => {
-      if (!el) return;
-      gsap.set(el, { autoAlpha: i === 0 ? 1 : 0 });
-    });
-    wordRefs.current.forEach((words) => {
-      words.forEach((w) => {
-        if (w) gsap.set(w, { color: DIM });
+    const applySize = () => {
+      cards.forEach((el) => {
+        gsap.set(el, { width: metrics.cardW, height: metrics.cardH });
       });
-    });
-
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: section,
-        start: "top top",
-        end: () => `+=${totalScroll}`,
-        scrub: true,
-        pin: pin,
-        pinSpacing: true,
-        anticipatePin: 1,
-        invalidateOnRefresh: true,
-        onUpdate: (self) => {
-          gsap.set(bar, { scaleX: self.progress });
-        },
-      },
-    });
-
-    const waveShape: WaveParams = { ...STEP_PRESETS[0]! };
-    const pushWave = () => waveRef.current?.setParams(waveShape);
-
-    STEPS.forEach((_, i) => {
-      const stepEl = stepRefs.current[i];
-      const words = wordRefs.current[i] ?? [];
-      if (!stepEl) return;
-
-      const stepStart = i * STEP_DURATION;
-
-      if (i > 0) {
-        const prev = stepRefs.current[i - 1];
-        if (prev) {
-          tl.to(
-            prev,
-            { autoAlpha: 0, duration: 0.15, ease: "none" },
-            stepStart - 0.15,
-          );
-        }
-        tl.to(
-          stepEl,
-          { autoAlpha: 1, duration: 0.15, ease: "none" },
-          stepStart - 0.15,
-        );
-
-        const target = STEP_PRESETS[i]!;
-        tl.to(
-          waveShape,
-          {
-            amp: target.amp,
-            freq: target.freq,
-            complexity: target.complexity,
-            speed: target.speed,
-            thickness: target.thickness,
-            hue: target.hue,
-            curve: target.curve,
-            warp: target.warp,
-            chroma: target.chroma,
-            bias: target.bias,
-            duration: STEP_DURATION,
-            ease: "power2.inOut",
-            onUpdate: pushWave,
-          },
-          stepStart - STEP_DURATION * 0.5,
-        );
-      }
-
-      const perWord = REVEAL / Math.max(words.length, 1);
-      words.forEach((wEl, wi) => {
-        if (!wEl) return;
-        tl.to(
-          wEl,
-          {
-            color: BRIGHT,
-            duration: perWord,
-            ease: "none",
-          },
-          stepStart + wi * perWord,
-        );
-      });
-
-      tl.to({}, { duration: DWELL }, stepStart + REVEAL);
-    });
-
-    return () => {
-      tl.scrollTrigger?.kill();
-      tl.kill();
     };
-  }, [resolvedTheme]);
+
+    const build = () => {
+      timeline?.scrollTrigger?.kill();
+      timeline?.kill();
+      timeline = null;
+      measure(pin);
+      if (metrics.mobile) {
+        gsap.set(cards, { clearProps: "all" });
+        gsap.set(headline, { clearProps: "all" });
+        return;
+      }
+      applySize();
+
+      const rise = () => Math.round(pin.clientHeight * 0.92);
+      gsap.set(cards, {
+        xPercent: -50,
+        yPercent: -50,
+        left: "50%",
+        top: "48%",
+        x: 0,
+        y: rise,
+        scale: 1,
+        opacity: 0,
+        zIndex: 24,
+      });
+      gsap.set(before, { opacity: 1, zIndex: 30, force3d: true });
+      gsap.set(after, { opacity: 1, zIndex: 24, force3d: true });
+      gsap.set(headline, { autoAlpha: 1 });
+
+      timeline = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: "top top",
+          end: () => `+=${Math.round(window.innerHeight * 2.6)}`,
+          scrub: true,
+          pin,
+          pinSpacing: true,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+          onRefreshInit: () => {
+            measure(pin);
+            applySize();
+          },
+        },
+      });
+
+      const tl = timeline;
+      tl.to(before, { y: 0, duration: 1, ease: "none" }, 0);
+      tl.to(after, { y: 0, duration: 1, ease: "none" }, 0);
+      tl.to(headline, { autoAlpha: 0, duration: 0.28, ease: "none" }, 0.62);
+      tl.to(before, { x: () => slot(0), duration: 1, ease: "power2.inOut" }, 1);
+      tl.to(after, { x: () => slot(1), duration: 1, ease: "power2.inOut" }, 1);
+      tl.to({}, { duration: 0.15 }, 2);
+    };
+
+    build();
+    const onResize = () => {
+      const wasMobile = metrics.mobile;
+      measure(pin);
+      if (wasMobile !== metrics.mobile) {
+        build();
+        return;
+      }
+      if (metrics.mobile) return;
+      applySize();
+      ScrollTrigger.refresh();
+    };
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("resize", onResize);
+      timeline?.scrollTrigger?.kill();
+      timeline?.kill();
+    };
+  }, []);
 
   return (
     <section
       ref={sectionRef}
-      className="relative bg-background text-foreground"
-      aria-label="Value proposition"
+      className="relative z-30 -mt-[100vh] bg-background text-foreground"
+      aria-label="But PTFlow helps you deliver with speed"
     >
       <div
         ref={pinRef}
-        className="relative h-screen w-full overflow-hidden"
+        className="relative w-full bg-background max-[849px]:overflow-visible max-[849px]:px-5 max-[849px]:pb-16 min-[850px]:h-screen min-[850px]:overflow-hidden"
       >
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[58%] z-0">
-          <WaveShader ref={waveRef} dark={resolvedTheme === "dark"} initialParams={STEP_PRESETS[0]} />
-        </div>
-
-        <div className="absolute inset-x-0 top-0 h-px bg-foreground/10 z-10">
-          <div
-            ref={progressBarRef}
-            className="h-full w-full bg-accent"
-            style={{ transform: "scaleX(0)", transformOrigin: "0 0" }}
-          />
-        </div>
-
-        <div className="absolute inset-x-0 top-0 z-10 px-10 max-[850px]:px-6 pt-28 max-[850px]:pt-24 max-w-[1680px] mx-auto flex items-end justify-between gap-8">
-          <h2 className="max-w-[22ch] text-[clamp(1.5rem,2.4vw,2.25rem)] font-medium leading-[1.15] tracking-tight text-foreground/80">
-            A platform built for teams who&rsquo;d rather ship than orchestrate.
-          </h2>
-          <a
-            href="#"
-            className="group hidden max-[850px]:hidden min-[851px]:inline-flex items-center gap-2 rounded-md border border-foreground/[0.08] px-4 py-2.5 text-sm font-medium text-foreground/80 hover:text-foreground hover:border-foreground/[0.16] transition-colors whitespace-nowrap shrink-0"
+        <h2
+          ref={headlineRef}
+          className="pointer-events-none z-20 flex items-center justify-center px-6 max-[849px]:relative max-[849px]:px-1 max-[849px]:pt-28 max-[849px]:pb-8 min-[850px]:absolute min-[850px]:inset-0"
+        >
+          <motion.span
+            className="block max-w-[26ch] text-center text-[clamp(2.7rem,6.2vw,5.15rem)] font-medium leading-[1.02] tracking-tight text-[#2a2a2a] dark:text-foreground"
+            initial={{ y: -48, opacity: 0 }}
+            whileInView={{ y: 0, opacity: 1 }}
+            viewport={{ once: true, amount: 0.45 }}
+            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
           >
-            Learn more
-            <RollingArrow iconSize={16} />
-          </a>
-        </div>
+            <span className="block">But PTFlow helps you</span>
+            <span className="block">
+              deliver with <CyclingWord />
+            </span>
+          </motion.span>
+        </h2>
 
-        <div className="absolute inset-0 z-10 px-10 max-[850px]:px-6 pt-72 max-[850px]:pt-60 pb-16 max-w-[1680px] mx-auto pointer-events-none">
-          {STEPS.map((step, i) => (
-            <div
-              key={i}
-              ref={(el) => {
-                stepRefs.current[i] = el;
-              }}
-              className="absolute inset-0 px-10 max-[850px]:px-6 pt-72 max-[850px]:pt-60"
-              style={{ visibility: "hidden", opacity: 0 }}
-            >
-              <div className="grid grid-cols-12 gap-8 max-[850px]:grid-cols-1 max-[850px]:gap-6 max-w-[1680px] mx-auto">
-                <div className="col-span-3 max-[850px]:col-span-1">
-                  <span className="inline-flex items-center rounded-md border border-foreground/[0.08] px-3.5 py-1.5 font-mono text-xs tracking-widest text-foreground/70">
-                    {String(i + 1).padStart(2, "0")}
-                    <span className="mx-1.5 text-foreground/30">/</span>
-                    {String(STEPS.length).padStart(2, "0")}
-                  </span>
-                  <p className="mt-6 font-mono text-xs uppercase tracking-[0.2em] text-foreground/40">
-                    {step.eyebrow}
-                  </p>
-                </div>
-
-                <p className="col-span-9 max-[850px]:col-span-1 text-[clamp(2rem,4.2vw,4rem)] font-medium leading-[1.1] tracking-tight">
-                  {step.body.split(" ").map((word, wi) => (
-                    <span key={wi}>
-                      <span
-                        ref={(el) => {
-                          const arr = wordRefs.current[i];
-                          if (arr) arr[wi] = el;
-                        }}
-                      >
-                        {word}
-                      </span>
-                      {wi < step.body.split(" ").length - 1 ? " " : ""}
-                    </span>
-                  ))}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
+        {CARDS.map((card, index) => (
+          <ComparisonCard
+            key={card.label}
+            card={card}
+            {...(card.label === "Before" ? { id: "before-mark" } : {})}
+            className="flex flex-col rounded-[32px] px-8 pt-8 pb-8 max-[849px]:relative max-[849px]:mb-4 max-[849px]:w-full sm:px-10 sm:pt-9 min-[850px]:absolute min-[850px]:z-30 min-[850px]:opacity-0"
+            ref={(el) => {
+              cardRefs.current[index] = el;
+            }}
+          />
+        ))}
       </div>
     </section>
   );

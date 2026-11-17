@@ -4,7 +4,7 @@ import { SkipToContent } from "@/components/skip-to-content";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { baseMetadata } from "@/lib/metadata";
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Schoolbell } from "next/font/google";
 import type { ReactNode } from "react";
 import "./globals.css";
 
@@ -17,6 +17,13 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const schoolbell = Schoolbell({
+  variable: "--font-schoolbell",
+  subsets: ["latin"],
+  weight: "400",
   display: "swap",
 });
 
@@ -40,7 +47,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-background font-sans text-foreground antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${schoolbell.variable} min-h-screen bg-background font-sans text-foreground antialiased`}
       >
         <Providers>
           <SkipToContent />

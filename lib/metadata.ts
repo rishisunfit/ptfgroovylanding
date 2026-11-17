@@ -1,21 +1,21 @@
 import type { Metadata } from "next";
 
 export const siteConfig = {
-  name: "Lumen",
-  shortDescription: "Build what matters, ship without limits.",
+  name: "PTFlow",
+  shortDescription: "For coaches who think beyond limits.",
   description:
-    "Lumen is the all-in-one platform for product teams to design, deploy, and scale software. Plan, build, and ship from a single surface with real-time collaboration, branch previews, and integrations for GitHub, Slack, and Linear.",
-  url: "https://example.com",
+    "PTFlow is the all-in-one platform for product teams to design, deploy, and scale software. Plan, build, and ship from a single surface with real-time collaboration, branch previews, and integrations for GitHub, Slack, and Linear.",
+  url: "https://ptflow.io",
   ogImage: "/og-image.png",
-  creator: "@lumen",
+  creator: "@ptflow",
   authors: [
     {
-      name: "Lumen",
-      url: "https://example.com",
+      name: "PTFlow",
+      url: "https://ptflow.io",
     },
   ],
   keywords: [
-    "Lumen",
+    "PTFlow",
     "developer platform",
     "product platform",
     "ship software",

@@ -4,6 +4,7 @@ import { useShaderVariant } from "@/components/shader-variant-context";
 import { SHADER_VARIANTS, type ShaderVariantId } from "@/lib/shader-variants";
 import { AnimatePresence, motion } from "motion/react";
 import { Palette } from "lucide-react";
+import { usePathname } from "next/navigation";
 import {
   useCallback,
   useEffect,
@@ -21,6 +22,7 @@ export function ShaderVariantToggle(): ReactNode {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
   const labelId = useId();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!open) return;
@@ -53,9 +55,11 @@ export function ShaderVariantToggle(): ReactNode {
     [setVariantId],
   );
 
+  if (pathname === "/login") return null;
+
   return (
 
-    <div className="fixed bottom-[160px] right-6 z-50">
+    <div className="fixed bottom-[160px] right-6 z-50 min-[850px]:top-[58%] min-[850px]:bottom-auto min-[850px]:left-6 min-[850px]:right-auto">
       <button
         ref={buttonRef}
         type="button"
@@ -83,7 +87,7 @@ export function ShaderVariantToggle(): ReactNode {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.96 }}
             transition={{ duration: 0.22, ease: easeOutExpo }}
-            className="absolute bottom-12 right-0 min-w-[240px] rounded-xl border border-foreground/[0.08] bg-background p-2 shadow-2xl"
+            className="absolute bottom-12 right-0 min-w-[240px] rounded-xl border border-foreground/[0.08] bg-background p-2 shadow-2xl min-[850px]:right-auto min-[850px]:left-0"
             style={{ originX: 1, originY: 1 }}
           >
             <ul className="flex flex-col gap-0.5">

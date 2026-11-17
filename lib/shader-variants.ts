@@ -172,8 +172,31 @@ export const SHADER_VARIANTS: readonly ShaderVariant[] = [
   },
 ] as const;
 
+const MINT_MONO: ShaderVariant = {
+  id: "mint",
+  label: "Mint",
+  description: "Charcoal mono with a mint cast",
+  swatch: "#5ec29c",
+  hero: {
+    base: rgb(0.015, 0.04, 0.03),
+    warm: rgb(0.26, 0.48, 0.38),
+    mid: rgb(0.1, 0.26, 0.2),
+    cool: rgb(0.4, 0.68, 0.55),
+    cursor: rgb(0.04, 0.1, 0.07),
+    rgScale: rgb(1.0, 1.0, 1.0),
+    brightness: 1.5,
+  },
+  wave: [
+    rgb(0.04, 0.1, 0.07),
+    rgb(0.12, 0.28, 0.22),
+    rgb(0.22, 0.46, 0.36),
+    rgb(0.4, 0.66, 0.54),
+    rgb(0.62, 0.84, 0.74),
+  ],
+};
+
 const VARIANT_MAP: Map<string, ShaderVariant> = new Map(
-  SHADER_VARIANTS.map((v) => [v.id, v]),
+  [...SHADER_VARIANTS, MINT_MONO].map((v) => [v.id, v]),
 );
 
 export function getVariantById(id: string | undefined): ShaderVariant {

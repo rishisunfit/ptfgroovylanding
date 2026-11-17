@@ -54,9 +54,18 @@ export function SmoothScroll({ children }: { children: ReactNode }): ReactNode {
       lenis.scrollTo(element, { offset: ANCHOR_OFFSET });
     }
 
+    function handleScrollTo(event: Event): void {
+      if (!(event instanceof CustomEvent)) return;
+      if (typeof event.detail !== "number") return;
+      event.preventDefault();
+      lenis.scrollTo(event.detail, { force: true });
+    }
+
     document.addEventListener("click", handleAnchorClick);
+    window.addEventListener("ptflow-scroll-to", handleScrollTo);
     return () => {
       document.removeEventListener("click", handleAnchorClick);
+      window.removeEventListener("ptflow-scroll-to", handleScrollTo);
       lenis.destroy();
     };
   }, []);

@@ -2,8 +2,6 @@ import { Faq } from "@/components/faq";
 import { FinalCta } from "@/components/final-cta";
 import { Footer } from "@/components/footer";
 import { Hero } from "@/components/hero";
-import { Partners } from "@/components/partners";
-import { Pillars } from "@/components/pillars";
 import { Pricing } from "@/components/pricing";
 import { Product } from "@/components/product";
 import { StructuredData } from "@/components/structured-data";
@@ -22,15 +20,10 @@ export default function HomePage(): ReactNode {
   return (
     <>
       <StructuredData />
-      <main
-        id="main-content"
-        className="relative z-10 flex-1 bg-background"
-      >
+      <main id="main-content" className="bg-background relative z-10 flex-1">
         <Hero />
         <ValueProp />
         <Product />
-        <Pillars />
-        <Partners />
         <Pricing />
         <Faq />
         <FinalCta />

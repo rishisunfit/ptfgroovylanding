@@ -20,6 +20,8 @@ interface RevealHeadlineProps {
   amount?: number;
 
   mutedFrom?: number;
+  accentFrom?: number;
+  stillOnDesktop?: boolean;
 }
 
 export function RevealHeadline({
@@ -31,6 +33,8 @@ export function RevealHeadline({
   delay = 0,
   amount = 0.5,
   mutedFrom,
+  accentFrom,
+  stillOnDesktop = false,
 }: RevealHeadlineProps): ReactNode {
   const ref = useRef<HTMLHeadingElement>(null);
 
@@ -58,6 +62,7 @@ export function RevealHeadline({
         const wordDelay = delay + wordIndex * stagger;
 
         const isMuted = mutedFrom !== undefined && wordIndex >= mutedFrom;
+        const isAccent = accentFrom !== undefined && wordIndex >= accentFrom;
 
         return (
           <span
@@ -67,6 +72,7 @@ export function RevealHeadline({
             <span
               className={[
                 "relative",
+                isAccent ? "text-[#5ec29c]" : "",
                 isMuted ? "text-foreground/35" : "",
               ].join(" ")}
             >
@@ -78,7 +84,10 @@ export function RevealHeadline({
               initial={{ y: "0%" }}
               animate={inView ? { y: "110%" } : { y: "0%" }}
               transition={{ ...blockTransition, delay: wordDelay }}
-              className="absolute inset-x-0 -top-[0.05em] -bottom-[0.2em] bg-foreground will-change-transform"
+              className={[
+                "absolute inset-x-0 -top-[0.05em] -bottom-[0.2em] bg-foreground will-change-transform",
+                stillOnDesktop ? "min-[850px]:hidden" : "",
+              ].join(" ")}
             />
           </span>
         );
