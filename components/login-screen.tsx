@@ -30,14 +30,19 @@ const FRAME_INSET = 20;
 const FRAME_RADIUS = 40;
 const easeOutExpo = [0.33, 1, 0.68, 1] as const;
 
-export function LoginScreen(): ReactNode {
+export function LoginScreen({ client = false }: { client?: boolean }): ReactNode {
   const [isSignUp, setIsSignUp] = useState(false);
   const slide = `left ${DURATION}ms ${EASING}, right ${DURATION}ms ${EASING}`;
 
   return (
     <div id="main" className="relative min-h-screen overflow-hidden bg-white">
-      <AuthPanel isSignUp={isSignUp} onToggle={setIsSignUp} slide={slide} />
-      <MarketingPanel isSignUp={isSignUp} slide={slide} />
+      <AuthPanel
+        isSignUp={isSignUp}
+        onToggle={setIsSignUp}
+        slide={slide}
+        client={client}
+      />
+      <MarketingPanel isSignUp={isSignUp} slide={slide} client={client} />
     </div>
   );
 }
@@ -85,9 +90,52 @@ const FEATURES = [
   },
 ] as const;
 
-function BrandLockup(): ReactNode {
+const CLIENT_FEATURES = [
+  {
+    Icon: Dumbbell,
+    label: "Today's workout",
+    desc: "Open it and start. No digging through texts.",
+  },
+  {
+    Icon: ClipboardCheck,
+    label: "Check-ins",
+    desc: "Tell your coach how the week actually felt.",
+  },
+  {
+    Icon: ChartLine,
+    label: "Progress",
+    desc: "See the work adding up, week over week.",
+  },
+  {
+    Icon: MessageSquare,
+    label: "Messages",
+    desc: "A direct line to your coach.",
+  },
+  {
+    Icon: Smartphone,
+    label: "On your phone",
+    desc: "The plan goes where you train.",
+  },
+  {
+    Icon: TrendingUp,
+    label: "Habits",
+    desc: "The small daily stuff, kept honest.",
+  },
+  {
+    Icon: Sparkles,
+    label: "Videos",
+    desc: "Film a set. Hear back on your form.",
+  },
+  {
+    Icon: Star,
+    label: "What's next",
+    desc: "This week, already laid out.",
+  },
+] as const;
+
+function BrandLockup({ className = "mb-8" }: { className?: string }): ReactNode {
   return (
-    <div className="mb-8 flex items-center gap-2.5">
+    <div className={`flex items-center gap-2.5 ${className}`}>
       <PtflowMark className="size-8" />
       <span
         className="text-2xl font-semibold tracking-[-0.04em]"
@@ -103,17 +151,40 @@ function AuthPanel({
   isSignUp,
   onToggle,
   slide,
+  client,
 }: {
   isSignUp: boolean;
   onToggle: (next: boolean) => void;
   slide: string;
+  client: boolean;
 }): ReactNode {
   return (
     <div
-      className="absolute top-0 bottom-0 z-10 flex w-full items-center justify-center overflow-y-auto bg-white p-6 lg:w-1/2 lg:p-12"
+      className={`absolute top-0 bottom-0 z-10 flex w-full justify-center overflow-y-auto bg-white lg:w-1/2 lg:items-center lg:p-12 ${client ? "items-start p-5" : "items-center p-6"}`}
       style={{ left: isSignUp ? "50%" : "0%", transition: slide }}
     >
-      <div className="relative w-full max-w-md py-8">
+      <div className={`relative w-full max-w-md ${client ? "py-5 lg:py-8" : "py-8"}`}>
+        {client ? (
+          <div className="mb-6 lg:hidden">
+            <BrandLockup className="mb-4" />
+            <h1
+              className="text-[1.7rem] leading-[1.05] font-semibold tracking-[-0.04em]"
+              style={{ color: INK }}
+            >
+              Your plan is on your phone now.
+            </h1>
+            <p className="mt-2 text-[15px] leading-snug text-[#242424]/60">
+              Download the app, then sign in with the email your coach already
+              has.
+            </p>
+            <DownloadCard
+              delay={0.2}
+              compact
+              client
+              className="mt-5 block w-full"
+            />
+          </div>
+        ) : null}
         <div
           style={{
             opacity: isSignUp ? 0 : 1,
@@ -124,7 +195,7 @@ function AuthPanel({
             transition: `opacity 500ms ${EASING}`,
           }}
         >
-          <SignInForm onSignUp={() => onToggle(true)} />
+          <SignInForm onSignUp={() => onToggle(true)} client={client} />
         </div>
         <div
           style={{
@@ -136,19 +207,27 @@ function AuthPanel({
             transition: `opacity 500ms ${EASING}`,
           }}
         >
-          <SignUpForm onSignIn={() => onToggle(false)} />
+          <SignUpForm onSignIn={() => onToggle(false)} client={client} />
         </div>
-        <DownloadCard
-          delay={0.45}
-          compact
-          className="mt-8 block w-full lg:hidden"
-        />
+        {client ? null : (
+          <DownloadCard
+            delay={0.45}
+            compact
+            className="mt-8 block w-full lg:hidden"
+          />
+        )}
       </div>
     </div>
   );
 }
 
-function SignInForm({ onSignUp }: { onSignUp: () => void }): ReactNode {
+function SignInForm({
+  onSignUp,
+  client = false,
+}: {
+  onSignUp: () => void;
+  client?: boolean;
+}): ReactNode {
   const [showPass, setShowPass] = useState(false);
 
   const submit = (e: FormEvent): void => {
@@ -158,9 +237,11 @@ function SignInForm({ onSignUp }: { onSignUp: () => void }): ReactNode {
   return (
     <>
       <ClipLine delay={0.05}>
-        <BrandLockup />
+        <div className={client ? "hidden lg:block" : undefined}>
+          <BrandLockup />
+        </div>
       </ClipLine>
-      <div className="mb-8">
+      <div className={client ? "mb-6 lg:mb-8" : "mb-8"}>
         <ClipLine delay={0.18}>
           <h1
             className="mb-2 text-3xl font-semibold tracking-[-0.04em]"
@@ -171,7 +252,9 @@ function SignInForm({ onSignUp }: { onSignUp: () => void }): ReactNode {
         </ClipLine>
         <ClipLine delay={0.3}>
           <p className="text-[15px] text-[#242424]/55">
-            Please enter your details to sign in
+            {client
+              ? "Sign in with the email your coach used."
+              : "Please enter your details to sign in"}
           </p>
         </ClipLine>
       </div>
@@ -252,7 +335,13 @@ function SignInForm({ onSignUp }: { onSignUp: () => void }): ReactNode {
   );
 }
 
-function SignUpForm({ onSignIn }: { onSignIn: () => void }): ReactNode {
+function SignUpForm({
+  onSignIn,
+  client = false,
+}: {
+  onSignIn: () => void;
+  client?: boolean;
+}): ReactNode {
   const [showPass, setShowPass] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -263,20 +352,24 @@ function SignUpForm({ onSignIn }: { onSignIn: () => void }): ReactNode {
   return (
     <>
       <ClipLine delay={0.05}>
-        <BrandLockup />
+        <div className={client ? "hidden lg:block" : undefined}>
+          <BrandLockup />
+        </div>
       </ClipLine>
-      <div className="mb-8">
+      <div className={client ? "mb-6 lg:mb-8" : "mb-8"}>
         <ClipLine delay={0.18}>
           <h1
             className="mb-2 text-3xl font-semibold tracking-[-0.04em]"
             style={{ color: INK }}
           >
-            Create an account
+            {client ? "Create your account" : "Create an account"}
           </h1>
         </ClipLine>
         <ClipLine delay={0.3}>
           <p className="text-[15px] text-[#242424]/55">
-            Get started with your free account
+            {client
+              ? "This is the account your coach will see."
+              : "Get started with your free account"}
           </p>
         </ClipLine>
       </div>
@@ -512,9 +605,11 @@ function RevealLines({
 function MarketingPanel({
   isSignUp,
   slide,
+  client,
 }: {
   isSignUp: boolean;
   slide: string;
+  client: boolean;
 }): ReactNode {
   const fade = `opacity 500ms ${EASING}, transform ${DURATION}ms ${EASING}`;
 
@@ -546,7 +641,11 @@ function MarketingPanel({
           aria-hidden={isSignUp}
         >
           <RevealLines
-            lines={["Everything you need", "to run your coaching business"]}
+            lines={
+              client
+                ? ["Your plan.", "Your pocket."]
+                : ["Everything you need", "to run your coaching business"]
+            }
             className="text-[1.7rem] leading-[1.05] font-semibold tracking-[-0.04em] text-white xl:text-3xl"
           />
 
@@ -556,7 +655,7 @@ function MarketingPanel({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.36, ease: easeOutExpo }}
           >
-            {FEATURES.map((f) => (
+            {(client ? CLIENT_FEATURES : FEATURES).map((f) => (
               <div
                 key={f.label}
                 className="flex items-start gap-3 rounded-xl border border-white/15 bg-[#121214]/45 px-3.5 py-3 backdrop-blur-[2px]"
@@ -576,7 +675,12 @@ function MarketingPanel({
             ))}
           </motion.div>
 
-          <DownloadCard delay={0.5} compact className="mt-4 block w-full" />
+          <DownloadCard
+            delay={0.5}
+            compact
+            client={client}
+            className="mt-4 block w-full"
+          />
         </div>
 
         <div
@@ -593,12 +697,17 @@ function MarketingPanel({
         >
           <div className="max-w-md text-white">
             <RevealLines
-              lines={["Start your journey", "with us"]}
+              lines={
+                client
+                  ? ["You're in", "the right place"]
+                  : ["Start your journey", "with us"]
+              }
               className="text-4xl font-semibold tracking-[-0.04em]"
             />
             <p className="mt-4 text-lg text-white/75">
-              Join thousands of coaches already using PTFlow to streamline their
-              workflow and boost productivity.
+              {client
+                ? "Your coach already built the plan. The app is how you follow it, log it, and stay in touch."
+                : "Join thousands of coaches already using PTFlow to streamline their workflow and boost productivity."}
             </p>
             <div className="mt-8 rounded-2xl border border-white/20 bg-white/10 p-6 backdrop-blur-sm">
               <div className="mb-4 flex items-center gap-4">
@@ -624,11 +733,14 @@ function MarketingPanel({
                 </div>
               </div>
               <p className="text-sm text-white/90">
-                &quot;PTFlow has transformed how I manage my clients. Highly
-                recommended!&quot;
+                {client
+                  ? "“I open it, I do the workout, I log it. That's the whole routine now.”"
+                  : "“PTFlow has transformed how I manage my clients. Highly recommended!”"}
               </p>
               <p className="mt-2 text-xs text-white/60">
-                - Sarah Johnson, Fitness Coach
+                {client
+                  ? "- Priya Shah"
+                  : "- Sarah Johnson, Fitness Coach"}
               </p>
             </div>
           </div>

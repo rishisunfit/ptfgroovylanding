@@ -22,7 +22,7 @@ export function ThemeSwitch(): ReactNode {
     setTheme(resolvedTheme === "dark" ? "light" : "dark");
   };
 
-  if (pathname === "/login") return null;
+  if (pathname === "/login" || pathname === "/mobile-download") return null;
 
   if (!mounted) {
     return (

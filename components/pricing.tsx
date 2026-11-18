@@ -96,7 +96,7 @@ const CUSTOM_APP: Tier = {
   price: "25+ Clients",
   unit: "/ Minimum / Application only",
   body: "Turn your small business into the biggest, boldest, baddest brand imagineable.",
-  cta: { label: "Apply now", href: "mailto:sales@ptflow.io" },
+  cta: { label: "Apply now", href: "#get-started" },
   features: [
     "Everything in Free tier",
     "Custom mobile app",

@@ -55,7 +55,7 @@ export function ShaderVariantToggle(): ReactNode {
     [setVariantId],
   );
 
-  if (pathname === "/login") return null;
+  if (pathname === "/login" || pathname === "/mobile-download") return null;
 
   return (
 

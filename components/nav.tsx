@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
-import { useEffect, useId, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 
 const easeOutExpo = [0.33, 1, 0.68, 1] as const;
 
@@ -23,7 +23,11 @@ const HEAD =
 const TAIL =
   "M1551.9,2498.15c-3.89-2.1-8.52-2.47-12.72-.99-4.14,1.48-7.53,4.69-9.26,8.77-20.44,48.53-36.98,98.91-52.97,147.68l-1.23,3.95c-71.68,218.81-288.2,557.89-377.91,693.47-14.69,22.1-14.26,50.38,1.05,71.87,12.16,17.04,31.24,26.67,51.49,26.67,5.37,0,10.8-.74,16.24-2.1,216.46-56.06,647.16-196.95,888.45-369.33,5.99-4.32,8.21-12.1,5.37-19.02-124.22-295.37-378.04-491.58-508.49-560.97Z";
 
-export function PtflowMark({ className = "" }: { className?: string }): ReactNode {
+export function PtflowMark({
+  className = "",
+}: {
+  className?: string;
+}): ReactNode {
   return (
     <svg viewBox="171 270 3260 3260" className={className} aria-hidden="true">
       <path d={BODY} fill="#5ec29c" />
@@ -62,13 +66,34 @@ export function FillablePtflowMark({
         </clipPath>
       </defs>
       <g clipPath={`url(#${uid}-body)`}>
-        <rect x="0" y="200" width="3600" height="3400" fill="#5ec29c" style={rise("0s")} />
+        <rect
+          x="0"
+          y="200"
+          width="3600"
+          height="3400"
+          fill="#5ec29c"
+          style={rise("0s")}
+        />
       </g>
       <g clipPath={`url(#${uid}-head)`}>
-        <rect x="1600" y="200" width="1400" height="1400" fill="#242424" style={rise("0.12s")} />
+        <rect
+          x="1600"
+          y="200"
+          width="1400"
+          height="1400"
+          fill="#242424"
+          style={rise("0.12s")}
+        />
       </g>
       <g clipPath={`url(#${uid}-tail)`}>
-        <rect x="900" y="2100" width="1600" height="1600" fill="#242424" style={rise("0.22s")} />
+        <rect
+          x="900"
+          y="2100"
+          width="1600"
+          height="1600"
+          fill="#242424"
+          style={rise("0.22s")}
+        />
       </g>
       <g
         fill="none"
@@ -78,7 +103,9 @@ export function FillablePtflowMark({
         strokeLinecap="round"
         style={{
           opacity: filled ? 0 : 1,
-          transition: filled ? "opacity 0.35s ease 0.28s" : "opacity 0.25s ease",
+          transition: filled
+            ? "opacity 0.35s ease 0.28s"
+            : "opacity 0.25s ease",
         }}
       >
         <path d={BODY} />
@@ -125,6 +152,7 @@ function useHideDock(): boolean {
 
 function useLogoFill(): boolean {
   const [filled, setFilled] = useState(false);
+  const mobileLatched = useRef(false);
 
   useEffect(() => {
     const cta = document.querySelector("#get-started");
@@ -134,13 +162,21 @@ function useLogoFill(): boolean {
       const nav = document.querySelector("nav");
       const mobile = window.innerWidth < 850;
       const target = mobile
-        ? document.querySelector('[aria-label="But PTFlow helps you deliver with speed"]')
+        ? document.querySelector(
+            '[aria-label="But PTFlow helps you deliver with speed"]'
+          )
         : document.getElementById("before-mark");
       if (!target) return;
       const line = nav?.getBoundingClientRect().bottom ?? 160;
       const top = target.getBoundingClientRect().top;
       const ctaTop = cta?.getBoundingClientRect().top ?? Infinity;
-      setFilled(top <= line && ctaTop > line);
+      const reached = top <= line;
+      if (mobile) {
+        if (reached) mobileLatched.current = true;
+        setFilled(mobileLatched.current);
+        return;
+      }
+      setFilled(reached && ctaTop > line);
     };
 
     const onScroll = () => {
@@ -170,7 +206,10 @@ function Wordmark({
 }): ReactNode {
   return (
     <span className={`inline-flex items-center gap-2.5 ${className}`}>
-      <FillablePtflowMark filled={filled} className="size-[34px] shrink-0 text-foreground/70" />
+      <FillablePtflowMark
+        filled={filled}
+        className="text-foreground/70 size-[34px] shrink-0"
+      />
       <span className="text-[16px] font-semibold tracking-[-0.03em]">
         PTFlow
       </span>
@@ -187,10 +226,7 @@ function Avatar(): ReactNode {
     >
       <rect width="60" height="60" fill="#d7ebe3" />
       <circle cx="30" cy="24" r="10" fill="#242424" />
-      <path
-        d="M8 62c2-16 10-24 22-24s20 8 22 24"
-        fill="#242424"
-      />
+      <path d="M8 62c2-16 10-24 22-24s20 8 22 24" fill="#242424" />
     </svg>
   );
 }
@@ -200,9 +236,7 @@ export function Nav({ delay = 1.4 }: NavProps): ReactNode {
   const [entered, setEntered] = useState(false);
   const logoFilled = useLogoFill();
   const dockHidden = useHideDock();
-  const dock = dockHidden
-    ? { opacity: 0, y: -18 }
-    : { opacity: 1, y: 0 };
+  const dock = dockHidden ? { opacity: 0, y: -18 } : { opacity: 1, y: 0 };
 
   useEffect(() => {
     const id = window.setTimeout(() => setEntered(true), delay * 1000 + 900);
@@ -247,7 +281,11 @@ export function Nav({ delay = 1.4 }: NavProps): ReactNode {
           animate={dock}
           aria-hidden={dockHidden}
           inert={dockHidden}
-          transition={{ duration: dockHidden ? 0.4 : 0.7, ease: easeOutExpo, delay: entered || dockHidden ? 0 : delay }}
+          transition={{
+            duration: dockHidden ? 0.4 : 0.7,
+            ease: easeOutExpo,
+            delay: entered || dockHidden ? 0 : delay,
+          }}
         >
           <a
             href="/"
@@ -275,13 +313,17 @@ export function Nav({ delay = 1.4 }: NavProps): ReactNode {
           className={`hidden min-[850px]:inline-flex ${dockHidden ? "pointer-events-none" : "pointer-events-auto"}`}
           initial={{ opacity: 0, y: -12 }}
           animate={dock}
-          transition={{ duration: dockHidden ? 0.4 : 0.7, ease: easeOutExpo, delay: entered || dockHidden ? 0 : delay + 0.08 }}
+          transition={{
+            duration: dockHidden ? 0.4 : 0.7,
+            ease: easeOutExpo,
+            delay: entered || dockHidden ? 0 : delay + 0.08,
+          }}
         >
           <Link
             href="/login"
             className="focus-ring inline-flex h-[60px] items-center rounded-full bg-[#242424] pr-0 pl-7 text-[14px] font-semibold tracking-[-0.03em] text-[#fafaf7] transition-colors duration-200 hover:bg-[#5dc39b] hover:text-[#242424]"
           >
-            Sign in now
+            Sign in
             <span className="ml-5 overflow-hidden rounded-full">
               <Avatar />
             </span>
@@ -312,7 +354,9 @@ export function Nav({ delay = 1.4 }: NavProps): ReactNode {
               <span className="relative block h-[13px] w-5" aria-hidden="true">
                 <motion.span
                   className="absolute left-0 h-0.5 w-5 rounded-full bg-[#292929]"
-                  animate={menuOpen ? { top: 5.5, rotate: 45 } : { top: 0, rotate: 0 }}
+                  animate={
+                    menuOpen ? { top: 5.5, rotate: 45 } : { top: 0, rotate: 0 }
+                  }
                   transition={{ duration: 0.25, ease: easeOutExpo }}
                 />
                 <motion.span
@@ -356,13 +400,13 @@ export function Nav({ delay = 1.4 }: NavProps): ReactNode {
                     </li>
                   ))}
                   <li>
-                    <Link
-                      href="/login"
+                    <a
+                      href="#get-started"
                       onClick={() => setMenuOpen(false)}
                       className="focus-ring mt-1 inline-flex h-12 w-full items-center justify-center rounded-full bg-[#242424] text-[14px] font-semibold tracking-[-0.03em] text-[#fafaf7]"
                     >
-                      Sign in now
-                    </Link>
+                      Download Now
+                    </a>
                   </li>
                 </ul>
               </motion.div>
